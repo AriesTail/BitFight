@@ -1,0 +1,8 @@
+if CURRENT EQUAL 0
+do 1
+endif
+set i RANDOM[10]
+if i EQUAL 9
+do 0
+endif
+do RESULT_B[CURRENT-1]

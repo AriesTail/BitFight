@@ -1,0 +1,5 @@
+set i RANDOM[4]
+if i EQUAL 3
+do 0
+endif
+do 1

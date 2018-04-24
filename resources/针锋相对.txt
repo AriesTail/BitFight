@@ -1,0 +1,4 @@
+if CURRENT EQUAL 0
+do 1
+endif
+do RESULT_B[CURRENT-1]

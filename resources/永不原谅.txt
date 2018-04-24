@@ -1,0 +1,11 @@
+set i 1
+set k 1
+if k LESS CURRENT
+if i EQUAL 1
+add k 1
+if RESULT_B[k] EQUAL 0
+set i 0
+endif
+endif
+endif
+do i
