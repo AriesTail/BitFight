@@ -25,10 +25,12 @@ public class Main {
 				put("if", new ValueAndParameter(100, 3));
 				put("endif", new ValueAndParameter(101, 0));
 
-				put("add", new ValueAndParameter(200, 2));//暂时不支持
+				put("add", new ValueAndParameter(200, 2));
 				put("sub", new ValueAndParameter(201, 2));
 				put("mul", new ValueAndParameter(202, 2));
 				put("div", new ValueAndParameter(203, 2));
+				
+				put("jump", new ValueAndParameter(300, 1));
 			}
 		};
 	}
@@ -52,8 +54,8 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
-			readfile("resources/永不原谅.txt", fountionsA);
-			readfile("resources/老实人探测器.txt", fountionsB);
+			readfile("resources/随机.txt", fountionsA);
+			readfile("resources/永不原谅.txt", fountionsB);
 
 			lexicalanalysis();
 
@@ -157,6 +159,13 @@ public class Main {
 					throw new Exception("错误参数数于" + le + "行 " + function.getKeyword());
 				}
 				break;
+				
+			case 300://跳转
+				if (!Pattern.matches(VARIABLE + "|" + NUMBER, function.getFirstparameter())
+						|| Pattern.matches("EQUAL|NOTEQUAL|GREATER|LESS", function.getFirstparameter())) {
+					throw new Exception("错误参数数于" + le + "行 " + function.getKeyword());
+				}
+				break;
 
 			default:
 				break;
@@ -204,8 +213,11 @@ public class Main {
 
 		Integer doit = 1;
 		Integer le = 1;
-		
-		for (Function function : functions) {
+
+		for (int i = 0; i < functions.size(); i++) {
+			
+			Function function =functions.get(i);
+//			System.out.println(function.toString());
 
 			ValueAndParameter currenttype = keyword.get(function.getKeyword());
 
@@ -214,8 +226,8 @@ public class Main {
 				if (doit > 0) {
 					if (Pattern.matches(BOOL, function.getFirstparameter())) {
 						Function.selfoperation.add(current, Integer.parseInt(function.getFirstparameter()));
+						System.out.println("");
 						return Integer.parseInt(function.getFirstparameter());
-
 					} else if (Pattern.matches(VARIABLE, function.getFirstparameter())) {
 						if (memory.get(function.getFirstparameter()) == null) {
 							throw new Exception("未定义变量：" + le + "行  " + function.getFirstparameter());
@@ -224,11 +236,13 @@ public class Main {
 							throw new Exception("变量值不为0或1：" + le + "行  " + memory.get(function.getFirstparameter()));
 						} else {
 							Function.selfoperation.add(current, memory.get(function.getFirstparameter()));
+							System.out.println("");
 							return memory.get(function.getFirstparameter());
 						}
 
 					} else if (Pattern.matches(RESULT, function.getFirstparameter())) {
 						Function.selfoperation.add(current, dealwithRESULT(current, function, function.getFirstparameter(), memory, GET));
+						System.out.println("");
 						return dealwithRESULT(current, function, function.getFirstparameter(), memory, GET);
 					}
 				}
@@ -349,6 +363,8 @@ public class Main {
 					default:
 						throw new Exception("错误关键字：" + le + "行 " + function.getSecondparameter());
 					}
+				} else {//跳过时
+					doit--;
 				}
 				break;
 
@@ -382,6 +398,35 @@ public class Main {
 							break;
 						}
 						memory.put(function.getFirstparameter(), value);
+					}
+				}
+				break;
+
+			case 300:
+				if (doit > 0) {
+					int value = -1;
+					if (Pattern.matches(NUMBER, function.getFirstparameter())) {// 数字
+						if (function.getFirstparameter().equals("CURRENT")) {
+							value = current;
+						} else {
+							value = Integer.parseInt(function.getFirstparameter());
+						}
+
+					} else if (Pattern.matches(VARIABLE, function.getFirstparameter())) {// 变量
+						if (memory.get(function.getFirstparameter()) == null) {
+							throw new Exception("未定义变量：" + le + "行 " + function.getFirstparameter());
+						} else {
+							value = memory.get(function.getFirstparameter());
+						}
+					}
+					
+					if (value >= le) {
+						throw new Exception("行数错误: "+function.toString());
+					} else {
+						le = value - 1;
+						value--;// 变为从0开始
+						doit = 1;
+						i = value - 1;//还要往前一步
 					}
 				}
 				break;
@@ -463,7 +508,7 @@ public class Main {
 				throw new Exception("未定义变量：" + function.getFirstparameter());
 			}
 			if (value >= current || value < 0) {
-				throw new Exception("回合数错误" + inside);
+				throw new Exception("回合数错误" + function.toString() + value);
 			}
 			switch (outside) {
 			case "RESULT_A":
@@ -490,6 +535,11 @@ public class Main {
 	}
 
 	static class Function {
+
+		@Override
+		public String toString() {
+			return getKeyword()+' '+getFirstparameter()+' '+getSecondparameter()+' '+getThirdparameter();
+		}
 
 		public String getKeyword() {
 			return keyword;
