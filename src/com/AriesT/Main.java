@@ -55,7 +55,7 @@ public class Main {
 	public static void main(String[] args) {
 		try {
 			readfile("resources/随机.txt", fountionsA);
-			readfile("resources/永不原谅.txt", fountionsB);
+			readfile("resources/永远合作.txt", fountionsB);
 
 			lexicalanalysis();
 
